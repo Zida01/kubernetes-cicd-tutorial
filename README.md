@@ -14,7 +14,7 @@ To follow along with this tutorial, you'll need:
 
 ```bash
 helm repo add argo https://argoproj.github.io/argo-helm
-helm repo update
+helm repo update i
 kubectl create namespace argocd
 helm install argocd argo/argo-cd --namespace argocd
 ```
