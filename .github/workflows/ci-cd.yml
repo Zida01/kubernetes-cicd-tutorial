@@ -1,21 +1,25 @@
 name: CI/CD Pipeline
+
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+
 jobs:
   build-and-push:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest   # ✅ Use GitHub-hosted Linux runner
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.CR_PAT }}
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
@@ -27,33 +31,23 @@ jobs:
           tags: |
             ghcr.io/zida01/kubernetes-cicd-tutorial:latest
             ghcr.io/zida01/kubernetes-cicd-tutorial:${{ github.sha }}
+
       - name: Update GitOps repository
-        shell: wsl-bash {0}
+        shell: bash
         env:
           GIT_TOKEN: ${{ secrets.GITOPS_PAT }}
         run: |
-          # Configure git credential store
           git config --global credential.helper store
           echo "https://${GIT_TOKEN}:x-oauth-basic@github.com" > ~/.git-credentials
-          
-          # Remove any existing gitops directory
+
           rm -rf gitops
-          
-          # Clone repository using HTTPS URL without token
           git clone https://github.com/Zida01/grade-api-gitops.git gitops
           cd gitops
-          
-          if [[ "$OSTYPE" == "darwin"* ]]; then
-            sed -i '' "s|image: ghcr.io/zida01/kubernetes-cicd-tutorial:.*|image: ghcr.io/zida01/kubernetes-cicd-tutorial:${{ github.sha }}|g" deployment.yaml
-          else
-            sed -i "s|image: ghcr.io/zida01/kubernetes-cicd-tutorial:.*|image: ghcr.io/zida01/kubernetes-cicd-tutorial:${{ github.sha }}|g" deployment.yaml
-          fi
-          
-          # Commit changes
+
+          sed -i "s|image: ghcr.io/zida01/kubernetes-cicd-tutorial:.*|image: ghcr.io/zida01/kubernetes-cicd-tutorial:${{ github.sha }}|g" deployment.yaml
+
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           git add deployment.yaml
-          git commit -m "Update image to ${{ github.sha }}"
-          
-          # Push
+          git commit -m "Update image to ${{ github.sha }}" || echo "No changes"
           git push -f https://${GIT_TOKEN}@github.com/Zida01/grade-api-gitops.git main
