@@ -32,8 +32,8 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ env.IMAGE_ID }}:latest
-            ghcr.io/${{ env.IMAGE_ID }}:${{ github.sha }}
+            ghcr.io/zida01/kubernetes-cicd-tutorial:latest
+            ghcr.io/zida01/kubernetes-cicd-tutorial:${{ github.sha }}
       - name: Update GitOps repository
         shell: bash
         env:
@@ -51,9 +51,9 @@ jobs:
           cd gitops
           
           if [[ "$OSTYPE" == "darwin"* ]]; then
-            sed -i '' "s|image: ghcr.io/${{ env.IMAGE_ID }}:.*|image: ghcr.io/${{ env.IMAGE_ID }}:${{ github.sha }}|g" deployment.yaml
+            sed -i '' "s|image: ghcr.io/zida01/kubernetes-cicd-tutorial:.*|image: ghcr.io/zida01/kubernetes-cicd-tutorial:${{ github.sha }}|g" deployment.yaml
           else
-            sed -i "s|image: ghcr.io/${{ env.IMAGE_ID }}:.*|image: ghcr.io/${{ env.IMAGE_ID }}:${{ github.sha }}|g" deployment.yaml
+            sed -i "s|image: ghcr.io/zida01/kubernetes-cicd-tutorial:.*|image: ghcr.io/zida01/kubernetes-cicd-tutorial:${{ github.sha }}|g" deployment.yaml
           fi
           
           # Commit changes
