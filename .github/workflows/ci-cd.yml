@@ -20,7 +20,7 @@ jobs:
         uses: docker/setup-buildx-action@v2
 
       - name: Set lowercase image name
-        id: vars
+        shell: bash
         run: |
           IMAGE_ID="${GITHUB_REPOSITORY}"
           IMAGE_ID=$(echo $IMAGE_ID | tr '[:upper:]' '[:lower:]')
